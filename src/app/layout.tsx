@@ -61,6 +61,9 @@ export const metadata: Metadata = {
     },
   },
   manifest: "/manifest.json",
+  verification: {
+    google: "XLnEHO-CkRzaw_x14oEsu_J2szNIZP_iT2VtfLBkQms",
+  },
   openGraph: {
     title: "Chakra Healing Hypnosis | Align Your Energy, Transform Your Life",
     description:
