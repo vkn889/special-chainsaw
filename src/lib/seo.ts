@@ -5,11 +5,11 @@ export const OG_IMAGE = {
   url: "/images/og-cover.jpg",
   width: 1200,
   height: 630,
-  alt: "Chakra Healing Hypnosis — Heal From Within. Awaken Your Energy.",
+  alt: "Chakra Healing Hypnosis with Saroja — Heal From Within. Awaken Your Energy.",
 };
 
-const DEFAULT_TITLE =
-  "Chakra Healing Hypnosis | QHHT Practitioner in Mill Creek, WA & Worldwide";
+export const DEFAULT_TITLE =
+  "Chakra Healing Hypnosis with Saroja | QHHT Practitioner in Mill Creek, WA & Worldwide";
 
 // Next.js does not deep-merge `openGraph`/`twitter` between a layout and a
 // page — a page-level value fully replaces the parent's, silently dropping

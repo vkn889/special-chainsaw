@@ -29,7 +29,7 @@ export default function Hero() {
         >
           Heal From Within.
           <br />
-          <span className="italic text-gold">Awaken Your Energy.</span>
+          <span className="italic text-gold">Awaken Your Energy — with Saroja.</span>
         </h1>
 
         <p
