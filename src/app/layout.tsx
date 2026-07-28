@@ -8,7 +8,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import JsonLd from "@/components/JsonLd";
 import { localBusinessSchema, SITE_URL } from "@/lib/structured-data";
-import { OG_IMAGE } from "@/lib/seo";
+import { DEFAULT_TITLE, OG_IMAGE } from "@/lib/seo";
 
 const cormorant = Cormorant_Garamond({
   variable: "--font-heading",
@@ -28,8 +28,7 @@ const jost = Jost({
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default:
-      "Chakra Healing Hypnosis | QHHT Practitioner in Mill Creek, WA & Worldwide",
+    default: DEFAULT_TITLE,
     template: "%s | Chakra Healing Hypnosis",
   },
   description:
@@ -65,7 +64,7 @@ export const metadata: Metadata = {
     google: "XLnEHO-CkRzaw_x14oEsu_J2szNIZP_iT2VtfLBkQms",
   },
   openGraph: {
-    title: "Chakra Healing Hypnosis | Align Your Energy, Transform Your Life",
+    title: DEFAULT_TITLE,
     description:
       "Experience the profound union of Chakra Healing and deep Hypnosis with Saroja, QHHT certified practitioner. In-person sessions in Mill Creek, WA and virtual sessions worldwide.",
     url: SITE_URL,
@@ -76,7 +75,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Chakra Healing Hypnosis | Align Your Energy, Transform Your Life",
+    title: DEFAULT_TITLE,
     description:
       "Experience the profound union of Chakra Healing and deep Hypnosis — a sacred journey into your subconscious to release blocks and reconnect with your highest self.",
     images: [OG_IMAGE.url],
