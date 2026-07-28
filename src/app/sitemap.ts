@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 
-const siteUrl = "https://chakrahealinghypnosis.com";
+const siteUrl = "https://www.chakrahealinghypnosis.com";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const lastModified = new Date();

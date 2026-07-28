@@ -7,7 +7,7 @@ import {
   TESTIMONIALS,
 } from "./content";
 
-export const SITE_URL = "https://chakrahealinghypnosis.com";
+export const SITE_URL = "https://www.chakrahealinghypnosis.com";
 
 export function localBusinessSchema() {
   const reviews = TESTIMONIALS.map((t) => ({

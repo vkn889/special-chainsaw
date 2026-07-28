@@ -43,7 +43,7 @@ export default function Footer() {
       </div>
 
       <p className="mt-8 text-xs text-muted text-center">
-        © 2026 Chakra Healing Hypnosis · chakrahealinghypnosis.com
+        © 2026 Chakra Healing Hypnosis · www.chakrahealinghypnosis.com
       </p>
     </footer>
   );
