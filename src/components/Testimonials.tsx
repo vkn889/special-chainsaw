@@ -21,11 +21,11 @@ export default function Testimonials() {
         <p className="text-gold text-xs tracking-[0.35em] uppercase mb-5">
           ✦ Client Experiences
         </p>
-        <h2 className="font-heading text-4xl sm:text-5xl text-cream leading-tight max-w-2xl">
+        <h1 className="font-heading text-4xl sm:text-5xl text-cream leading-tight max-w-2xl">
           Words From Those
           <br />
           <span className="italic text-gold">Who Have Journeyed</span>
-        </h2>
+        </h1>
 
         {ELFSIGHT_WIDGET_ID ? (
           <ElfsightReviews widgetId={ELFSIGHT_WIDGET_ID} />
