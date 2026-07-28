@@ -25,11 +25,11 @@ export default function About() {
           <p className="text-gold text-xs tracking-[0.35em] uppercase mb-5">
             ✦ Welcome
           </p>
-          <h2 className="font-heading text-4xl sm:text-5xl text-cream leading-tight">
+          <h1 className="font-heading text-4xl sm:text-5xl text-cream leading-tight">
             Your Soul Has Been
             <br />
             <span className="italic text-gold">Waiting for This</span>
-          </h2>
+          </h1>
           <div className="w-16 h-px bg-gold/60 my-7" />
 
           <div className="space-y-5 text-muted leading-relaxed">

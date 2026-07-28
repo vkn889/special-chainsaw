@@ -101,11 +101,11 @@ export default function Services() {
   return (
     <section id="sessions" className="bg-deep-2 py-24 sm:py-32">
       <div className="mx-auto max-w-6xl px-6 sm:px-8">
-        <h2 className="font-heading text-4xl sm:text-5xl text-cream leading-tight">
+        <h1 className="font-heading text-4xl sm:text-5xl text-cream leading-tight">
           Choose Your
           <br />
           <span className="italic text-gold">Healing Path</span>
-        </h2>
+        </h1>
 
         {/* QHHT Session */}
         <div className="mt-14 rounded-3xl border-t-2 border-transparent bg-gradient-to-r from-violet via-gold to-teal p-[1px]">

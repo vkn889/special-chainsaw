@@ -55,11 +55,11 @@ export default function Contact() {
           <p className="text-gold text-xs tracking-[0.35em] uppercase mb-5">
             ✦ Reach Out
           </p>
-          <h2 className="font-heading text-4xl sm:text-5xl text-cream leading-tight">
+          <h1 className="font-heading text-4xl sm:text-5xl text-cream leading-tight">
             Let&apos;s Begin
             <br />
             <span className="italic text-gold">Your Journey</span>
-          </h2>
+          </h1>
           <div className="w-16 h-px bg-gold/60 my-7" />
           <p className="text-muted leading-relaxed max-w-md">
             Ready to explore what&apos;s possible? Fill out the form and

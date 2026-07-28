@@ -3,6 +3,13 @@ import Hero from "@/components/Hero";
 import ChakraStrip from "@/components/ChakraStrip";
 import Benefits from "@/components/Benefits";
 import CTABand from "@/components/CTABand";
+import { pageMetadata } from "@/lib/seo";
+
+export const metadata = pageMetadata({
+  description:
+    "Chakra Healing Hypnosis with Saroja, a QHHT certified practitioner in Mill Creek, WA. In-person and virtual sessions to release blocks, balance your energy, and reconnect with your highest self.",
+  path: "/",
+});
 
 const EXPLORE_LINKS = [
   {
