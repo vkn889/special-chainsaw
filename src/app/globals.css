@@ -1,0 +1,165 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+:root {
+  --color-deep: #0d0a1a;
+  --color-deep-2: #120e24;
+  --color-violet: #7b4fa6;
+  --color-violet-light: #9b6fc6;
+  --color-gold: #c9a84c;
+  --color-teal: #4aada8;
+  --color-rose: #c47b8a;
+  --color-cream: #f5f0e8;
+  --color-muted: #a89bbf;
+
+  --color-root: #c0392b;
+  --color-sacral: #d9822b;
+  --color-solar: #d9b93a;
+  --color-heart: #3fa66a;
+  --color-throat: #3f8fd9;
+  --color-thirdeye: #4a4ac9;
+  --color-crown: #9b5fd9;
+
+  /* shadcn/ui semantic tokens mapped to our brand — site is dark-only */
+  --background: var(--color-deep);
+  --foreground: var(--color-cream);
+  --card: var(--color-deep-2);
+  --card-foreground: var(--color-cream);
+  --popover: var(--color-deep-2);
+  --popover-foreground: var(--color-cream);
+  --primary: var(--color-violet);
+  --primary-foreground: var(--color-cream);
+  --secondary: var(--color-deep-2);
+  --secondary-foreground: var(--color-cream);
+  --muted: var(--color-deep-2);
+  --muted-foreground: var(--color-muted);
+  --accent: var(--color-gold);
+  --accent-foreground: var(--color-deep);
+  --destructive: var(--color-root);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: var(--color-gold);
+  --radius: 0.85rem;
+}
+
+@theme inline {
+  --color-deep: var(--color-deep);
+  --color-deep-2: var(--color-deep-2);
+  --color-violet: var(--color-violet);
+  --color-violet-light: var(--color-violet-light);
+  --color-gold: var(--color-gold);
+  --color-teal: var(--color-teal);
+  --color-rose: var(--color-rose);
+  --color-cream: var(--color-cream);
+  --color-muted: var(--color-muted);
+
+  --font-heading: var(--font-heading);
+  --font-body: var(--font-body);
+  --font-sans: var(--font-body);
+
+  --animate-float: float 8s ease-in-out infinite;
+  --animate-float-slow: float 11s ease-in-out infinite;
+  --animate-float-slower: float 14s ease-in-out infinite;
+  --animate-pulse-dot: pulseDot 2.4s ease-in-out infinite;
+  --animate-ripple: ripple 2.4s ease-out infinite;
+  --animate-fade-up: fadeUp 0.9s ease-out both;
+  --animate-twinkle: twinkle 3.2s ease-in-out infinite;
+  --animate-nav-glow: navGlow 5s ease-in-out infinite;
+
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+@keyframes float {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-2%, 4%) scale(1.06); }
+}
+
+@keyframes pulseDot {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.25); opacity: 0.75; }
+}
+
+@keyframes ripple {
+  0% { transform: scale(0.6); opacity: 0.55; }
+  100% { transform: scale(2.4); opacity: 0; }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.35; transform: scale(0.9); }
+  50% { opacity: 1; transform: scale(1.1); }
+}
+
+@keyframes navGlow {
+  0%, 100% {
+    box-shadow:
+      0 0 20px -6px rgba(123, 79, 166, 0.35),
+      0 0 46px -14px rgba(201, 168, 76, 0.18);
+  }
+  50% {
+    box-shadow:
+      0 0 32px -6px rgba(123, 79, 166, 0.55),
+      0 0 60px -14px rgba(201, 168, 76, 0.32);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+body {
+  font-family: var(--font-body), sans-serif;
+}
+
+h1, h2, h3, h4, .font-heading {
+  font-family: var(--font-heading), serif;
+}
+
+::selection {
+  background: var(--color-violet);
+  color: var(--color-cream);
+}
+
+.text-gold {
+  color: var(--color-gold);
+}
+
+.bg-noise-radials {
+  background-image:
+    radial-gradient(ellipse 600px 500px at 12% 18%, rgba(123, 79, 166, 0.35), transparent 60%),
+    radial-gradient(ellipse 500px 450px at 85% 30%, rgba(74, 173, 168, 0.18), transparent 60%),
+    radial-gradient(ellipse 500px 500px at 20% 85%, rgba(196, 123, 138, 0.14), transparent 60%);
+}
