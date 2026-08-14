@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { CALENDLY_URLS, openCalendlyPopup } from "@/lib/calendly";
 
 const numberedSteps = {
@@ -119,7 +120,7 @@ export default function Services() {
               </span>
             </div>
 
-            <h3 className="font-heading text-3xl text-cream">QHHT Session</h3>
+            <h2 className="font-heading text-3xl text-cream">QHHT Session</h2>
             <p className="text-xs tracking-[0.15em] uppercase text-muted mt-1">
               Quantum Healing Hypnosis Technique
             </p>
@@ -192,9 +193,9 @@ export default function Services() {
               </span>
             </div>
 
-            <h3 className="font-heading text-3xl text-cream">
+            <h2 className="font-heading text-3xl text-cream">
               Virtual Quantum Healing Session
-            </h3>
+            </h2>
             <p className="text-xs tracking-[0.15em] uppercase text-muted mt-1">
               Deep Hypnosis &amp; Chakra Healing via Video Call
             </p>
@@ -260,6 +261,16 @@ export default function Services() {
             </div>
           </div>
         </div>
+
+        <p className="mt-10 text-center text-sm text-muted">
+          Curious what a session actually looks like?{" "}
+          <Link
+            href="/session-stories"
+            className="text-gold underline-offset-4 hover:underline"
+          >
+            Read real session stories →
+          </Link>
+        </p>
       </div>
     </section>
   );

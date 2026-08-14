@@ -16,6 +16,19 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+### Session Stories / Admin login (Supabase)
+
+The `/session-stories` page and the `/admin` login + dashboard are backed by
+a Supabase project (Postgres + Auth + Storage). Copy `.env.example` to
+`.env.local` and fill in your project's URL and publishable key:
+
+```bash
+cp .env.example .env.local
+```
+
+Without these vars set, `/session-stories` renders an empty state and
+`/admin` will throw on load — the site otherwise builds and runs fine.
+
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
