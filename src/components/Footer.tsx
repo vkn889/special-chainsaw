@@ -43,7 +43,10 @@ export default function Footer() {
       </div>
 
       <p className="mt-8 text-xs text-muted text-center">
-        © 2026 Chakra Healing Hypnosis · www.chakrahealinghypnosis.com
+        © 2026 Chakra Healing Hypnosis · www.chakrahealinghypnosis.com ·{" "}
+        <Link href="/admin" className="hover:text-gold transition-colors">
+          Admin Login
+        </Link>
       </p>
     </footer>
   );

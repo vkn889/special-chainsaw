@@ -7,7 +7,7 @@ import { pageMetadata } from "@/lib/seo";
 
 export const metadata = pageMetadata({
   description:
-    "Chakra Healing Hypnosis with Saroja, a QHHT certified practitioner in Mill Creek, WA. In-person and virtual sessions to release blocks, balance your energy, and reconnect with your highest self.",
+    "Chakra Healing Hypnosis with Saroja, a QHHT certified practitioner in Mill Creek, WA. In-person and virtual sessions to release blocks and restore your energy.",
   path: "/",
 });
 
@@ -26,6 +26,11 @@ const EXPLORE_LINKS = [
     href: "/sessions",
     title: "Sessions",
     description: "In-person in Mill Creek, WA, or virtual worldwide.",
+  },
+  {
+    href: "/session-stories",
+    title: "Session Stories",
+    description: "Real insights and healings from past sessions.",
   },
   {
     href: "/testimonials",

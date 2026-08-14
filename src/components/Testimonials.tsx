@@ -1,3 +1,4 @@
+import Link from "next/link";
 import {
   ELFSIGHT_WIDGET_ID,
   GOOGLE_PROFILE_URL,
@@ -103,6 +104,16 @@ export default function Testimonials() {
             ★ Leave a Google Review
           </a>
         </div>
+
+        <p className="mt-8 text-center text-sm text-muted">
+          Want the full picture?{" "}
+          <Link
+            href="/session-stories"
+            className="text-gold underline-offset-4 hover:underline"
+          >
+            Read in-depth session stories →
+          </Link>
+        </p>
       </div>
     </section>
   );

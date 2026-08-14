@@ -109,6 +109,22 @@ export function faqPageSchema() {
   };
 }
 
+export function sessionStoriesSchema(
+  stories: { id: string; title: string; created_at: string }[]
+) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "Session Stories — Chakra Healing Hypnosis",
+    itemListElement: stories.map((story, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      url: `${SITE_URL}/session-stories#${story.id}`,
+      name: story.title,
+    })),
+  };
+}
+
 export function breadcrumbSchema(pageName: string, path: string) {
   return {
     "@context": "https://schema.org",
