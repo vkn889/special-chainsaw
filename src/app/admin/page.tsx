@@ -3,6 +3,9 @@ import { redirect } from "next/navigation";
 import AdminLoginForm from "@/components/admin/AdminLoginForm";
 import { createClient } from "@/lib/supabase/server";
 
+// See src/app/session-stories/page.tsx for why this is required.
+export const dynamic = "force-dynamic";
+
 // Admin login has no value in search results and shouldn't be crawled.
 export const metadata: Metadata = {
   title: "Admin Login",

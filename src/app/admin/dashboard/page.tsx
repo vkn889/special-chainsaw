@@ -4,6 +4,9 @@ import AdminDashboard from "@/components/admin/AdminDashboard";
 import { createClient } from "@/lib/supabase/server";
 import { getSessionStories } from "@/lib/session-stories.server";
 
+// See src/app/session-stories/page.tsx for why this is required.
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Admin Dashboard",
   robots: { index: false, follow: false },
