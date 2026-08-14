@@ -3,6 +3,7 @@ import {
   FAQS,
   GOOGLE_PROFILE_URL,
   PRACTICE_ORIGIN,
+  SERVICE_AREA_CITIES,
   SOCIAL_LINKS,
   TESTIMONIALS,
 } from "./content";
@@ -48,7 +49,10 @@ export function localBusinessSchema() {
       longitude: PRACTICE_ORIGIN.lon,
     },
     areaServed: [
-      { "@type": "Place", name: "Mill Creek, WA and surrounding areas (25 mile radius)" },
+      ...SERVICE_AREA_CITIES.map((city) => ({
+        "@type": "City",
+        name: `${city}, WA`,
+      })),
       { "@type": "Place", name: "Worldwide (Virtual Sessions)" },
     ],
     founder: {
@@ -68,7 +72,7 @@ export function localBusinessSchema() {
             name: "QHHT Session",
             description:
               "A full-day, in-person Quantum Healing Hypnosis Technique session guiding you into the Somnambulistic level of trance.",
-            areaServed: "Mill Creek, WA",
+            areaServed: SERVICE_AREA_CITIES.map((city) => `${city}, WA`).join(", "),
           },
         },
         {

@@ -6,7 +6,7 @@ import { pageMetadata } from "@/lib/seo";
 export const metadata = pageMetadata({
   title: "Sessions (QHHT & Virtual Healing)",
   description:
-    "Choose your healing path: an in-person QHHT session in Mill Creek, WA, or a Virtual Quantum Healing Session available worldwide via video call.",
+    "Choose your healing path: an in-person QHHT session near Seattle (Mill Creek, WA), or a Virtual Quantum Healing Session worldwide.",
   path: "/sessions",
 });
 

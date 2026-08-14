@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { CALENDLY_URLS, openCalendlyPopup } from "@/lib/calendly";
+import { SERVICE_AREA_CITIES } from "@/lib/content";
 
 const numberedSteps = {
   qhht: [
@@ -133,6 +134,11 @@ export default function Services() {
               personal journey into the layers of your consciousness that
               hold your answers, your patterns, and your potential for
               healing.
+            </p>
+            <p className="mt-3 text-sm text-muted">
+              Serving {SERVICE_AREA_CITIES.slice(0, -1).join(", ")}, and{" "}
+              {SERVICE_AREA_CITIES[SERVICE_AREA_CITIES.length - 1]} within
+              a 25-mile radius of Mill Creek, WA.
             </p>
 
             <div className="mt-8 grid md:grid-cols-2 gap-10 border-t border-white/10 pt-8">

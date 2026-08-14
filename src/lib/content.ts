@@ -78,6 +78,11 @@ export const FAQS = [
       "Both. In-person QHHT sessions are held in Mill Creek, WA for local clients, while Virtual Quantum Healing Sessions are available worldwide via secure video call — your energy field has no geographical boundary.",
   },
   {
+    question: "Is there a QHHT practitioner near me in the Seattle area?",
+    answer:
+      "If you're within about 25 miles of Mill Creek, WA — including Bothell, Everett, Lynnwood, Edmonds, Kirkland, and Seattle — you're within range for an in-person QHHT session. Outside that range, or anywhere else in the world, a Virtual Quantum Healing Session offers the same depth of healing over a secure video call. Use the distance check on the Contact page to confirm you're in range.",
+  },
+  {
     question: "Will I receive a recording?",
     answer:
       "Yes. Every session includes a personal audio recording that is yours to keep forever. Many clients find that listening back in the days and weeks that follow continues to deepen the healing that began in session.",
@@ -141,3 +146,17 @@ export const SOCIAL_LINKS = [
 // Mill Creek, WA
 export const PRACTICE_ORIGIN = { lat: 47.8601, lon: -122.2043 };
 export const MAX_LOCAL_DISTANCE_MILES = 25;
+
+// Named cities within the ~25mi in-person radius. Naming actual towns
+// (rather than only "25 mile radius") is what local/"near me" search
+// results tend to reward — used in both the LocalBusiness schema's
+// areaServed and in on-page copy.
+export const SERVICE_AREA_CITIES = [
+  "Mill Creek",
+  "Bothell",
+  "Everett",
+  "Lynnwood",
+  "Edmonds",
+  "Kirkland",
+  "Seattle",
+] as const;
