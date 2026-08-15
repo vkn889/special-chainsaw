@@ -42,6 +42,13 @@ export default function AdminDashboard({
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
+
+  // Non-null while editing an existing story instead of creating a new
+  // one. `editingImagePath` holds that story's current photo so it's kept
+  // as-is on save unless a new file is chosen.
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingImagePath, setEditingImagePath] = useState<string | null>(null);
 
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -61,6 +68,31 @@ export default function AdminDashboard({
     setPreview(selected ? URL.createObjectURL(selected) : null);
   }
 
+  function resetForm() {
+    setEditingId(null);
+    setEditingImagePath(null);
+    setTitle("");
+    setBody("");
+    setSessionType(SESSION_TYPES[0]);
+    setFile(null);
+    setPreview(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  }
+
+  function startEdit(story: SessionStory) {
+    setEditingId(story.id);
+    setEditingImagePath(story.image_path);
+    setTitle(story.title);
+    setBody(story.body);
+    setSessionType(story.session_type ?? SESSION_TYPES[0]);
+    setFile(null);
+    setPreview(getSessionStoryImageUrl(story.image_path));
+    if (fileInputRef.current) fileInputRef.current.value = "";
+    setFormError(null);
+    setFormSuccess(null);
+    formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setFormError(null);
@@ -73,7 +105,9 @@ export default function AdminDashboard({
 
     setSubmitting(true);
     try {
-      let imagePath: string | null = null;
+      // Keep the existing photo on edit unless a new one was chosen;
+      // start blank (no photo) on a fresh story unless one was chosen.
+      let imagePath: string | null = editingId ? editingImagePath : null;
 
       if (file) {
         const path = `${crypto.randomUUID()}.${extensionFor(file)}`;
@@ -89,26 +123,30 @@ export default function AdminDashboard({
         imagePath = path;
       }
 
-      const { error: insertError } = await supabase.from("session_stories").insert({
+      const payload = {
         title: title.trim(),
         body: body.trim(),
         session_type: sessionType,
         image_path: imagePath,
-      });
+      };
 
-      if (insertError) {
-        setFormError(`Could not save the story: ${insertError.message}`);
+      const { error: saveError } = editingId
+        ? await supabase.from("session_stories").update(payload).eq("id", editingId)
+        : await supabase.from("session_stories").insert(payload);
+
+      if (saveError) {
+        setFormError(`Could not save the story: ${saveError.message}`);
         setSubmitting(false);
         return;
       }
 
-      setTitle("");
-      setBody("");
-      setSessionType(SESSION_TYPES[0]);
-      setFile(null);
-      setPreview(null);
-      if (fileInputRef.current) fileInputRef.current.value = "";
-      setFormSuccess("Published — it's already live on /session-stories.");
+      const wasEditing = Boolean(editingId);
+      resetForm();
+      setFormSuccess(
+        wasEditing
+          ? "Changes saved — already updated on /session-stories."
+          : "Published — it's already live on /session-stories."
+      );
       await loadStories();
     } finally {
       setSubmitting(false);
@@ -122,7 +160,10 @@ export default function AdminDashboard({
       await supabase.storage.from(SESSION_STORY_IMAGE_BUCKET).remove([story.image_path]);
     }
     const { error } = await supabase.from("session_stories").delete().eq("id", story.id);
-    if (!error) setStories((prev) => prev.filter((s) => s.id !== story.id));
+    if (!error) {
+      setStories((prev) => prev.filter((s) => s.id !== story.id));
+      if (editingId === story.id) resetForm();
+    }
   }
 
   async function handleSignOut() {
@@ -151,13 +192,14 @@ export default function AdminDashboard({
         </button>
       </div>
 
-      {/* New story form */}
+      {/* New / edit story form */}
       <form
+        ref={formRef}
         onSubmit={handleSubmit}
-        className="rounded-2xl border border-white/10 bg-deep-2 p-6 sm:p-8 space-y-5"
+        className="rounded-2xl border border-white/10 bg-deep-2 p-6 sm:p-8 space-y-5 scroll-mt-8"
       >
         <p className="text-gold text-xs tracking-[0.35em] uppercase mb-1">
-          ✦ New Session Story
+          {editingId ? "✎ Edit Session Story" : "✦ New Session Story"}
         </p>
 
         <div className="grid sm:grid-cols-2 gap-5">
@@ -204,7 +246,7 @@ export default function AdminDashboard({
               htmlFor="image"
               className="block text-[11px] tracking-[0.15em] uppercase text-muted mb-2"
             >
-              Photo (optional)
+              {editingId ? "Photo (leave blank to keep current)" : "Photo (optional)"}
             </label>
             <input
               id="image"
@@ -224,7 +266,7 @@ export default function AdminDashboard({
             <div className="sm:col-span-2">
               <Image
                 src={preview}
-                alt="Selected photo preview"
+                alt="Photo preview"
                 width={200}
                 height={150}
                 unoptimized
@@ -259,13 +301,31 @@ export default function AdminDashboard({
         )}
         {formSuccess && <p className="text-sm text-heart">{formSuccess}</p>}
 
-        <button
-          type="submit"
-          disabled={submitting}
-          className="rounded-full bg-violet px-6 py-3.5 text-xs tracking-[0.15em] uppercase text-cream transition-colors hover:bg-gold hover:text-deep disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {submitting ? "Publishing…" : "Publish Session Story"}
-        </button>
+        <div className="flex flex-wrap gap-4">
+          <button
+            type="submit"
+            disabled={submitting}
+            className="rounded-full bg-violet px-6 py-3.5 text-xs tracking-[0.15em] uppercase text-cream transition-colors hover:bg-gold hover:text-deep disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {submitting
+              ? editingId
+                ? "Saving…"
+                : "Publishing…"
+              : editingId
+                ? "Save Changes"
+                : "Publish Session Story"}
+          </button>
+          {editingId && (
+            <button
+              type="button"
+              onClick={resetForm}
+              disabled={submitting}
+              className="rounded-full border border-cream/25 px-6 py-3.5 text-xs tracking-[0.15em] uppercase text-cream transition-colors hover:border-gold hover:text-gold disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              Cancel
+            </button>
+          )}
+        </div>
       </form>
 
       {/* Existing stories */}
@@ -309,12 +369,24 @@ export default function AdminDashboard({
                     {new Date(story.created_at).toLocaleDateString()}
                   </p>
                 </div>
-                <button
-                  onClick={() => handleDelete(story)}
-                  className="shrink-0 rounded-full border border-root/40 px-4 py-2 text-[11px] tracking-[0.1em] uppercase text-root transition-colors hover:bg-root/10"
-                >
-                  Delete
-                </button>
+                <div className="flex shrink-0 items-center gap-2">
+                  <button
+                    onClick={() => startEdit(story)}
+                    aria-label={`Edit "${story.title}"`}
+                    title="Edit"
+                    className="flex h-8 w-8 items-center justify-center rounded-full border border-gold/40 text-gold transition-colors hover:bg-gold/10"
+                  >
+                    ✎
+                  </button>
+                  <button
+                    onClick={() => handleDelete(story)}
+                    aria-label={`Delete "${story.title}"`}
+                    title="Delete"
+                    className="rounded-full border border-root/40 px-4 py-2 text-[11px] tracking-[0.1em] uppercase text-root transition-colors hover:bg-root/10"
+                  >
+                    Delete
+                  </button>
+                </div>
               </li>
             ))}
           </ul>
