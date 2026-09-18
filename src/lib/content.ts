@@ -1,11 +1,31 @@
-export const NAV_LINKS = [
-  { href: "/about", label: "About" },
-  { href: "/what-is-this", label: "What Is This?" },
+export type NavItem = { href: string; label: string };
+export type NavLink = NavItem | { label: string; children: NavItem[] };
+
+// Flat links render directly in the navbar; a link with `children` renders
+// as a dropdown (desktop) / expandable group (mobile) instead, so the bar
+// doesn't get congested as more pages are added — group lesser-visited
+// pages there rather than growing this list flat.
+export const NAV_LINKS: NavLink[] = [
   { href: "/sessions", label: "Sessions" },
+  { href: "/events", label: "Events" },
   { href: "/session-stories", label: "Session Stories" },
-  { href: "/testimonials", label: "Testimonials" },
+  {
+    label: "About",
+    children: [
+      { href: "/about", label: "About Saroja" },
+      { href: "/what-is-this", label: "What Is This?" },
+      { href: "/testimonials", label: "Testimonials" },
+    ],
+  },
   { href: "/contact", label: "Contact" },
 ];
+
+/** Every nav destination flattened to a single list — for the footer,
+ *  which has room to list all pages and doesn't need the navbar's
+ *  dropdown grouping. */
+export const FOOTER_LINKS: NavItem[] = NAV_LINKS.flatMap((link) =>
+  "children" in link ? link.children : [link]
+);
 
 export const CHAKRAS = [
   { name: "Root", color: "#c0392b" },

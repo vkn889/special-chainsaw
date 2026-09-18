@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { NAV_LINKS, SOCIAL_LINKS } from "@/lib/content";
+import { FOOTER_LINKS, SOCIAL_LINKS } from "@/lib/content";
 import SocialIcon from "./SocialIcon";
 
 export default function Footer() {
@@ -15,7 +15,7 @@ export default function Footer() {
         </Link>
 
         <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3">
-          {NAV_LINKS.map((link) => (
+          {FOOTER_LINKS.map((link) => (
             <Link
               key={link.href}
               href={link.href}

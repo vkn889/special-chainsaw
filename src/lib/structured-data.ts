@@ -129,6 +129,59 @@ export function sessionStoriesSchema(
   };
 }
 
+export function eventsSchema(
+  events: {
+    id: string;
+    title: string;
+    description: string;
+    event_date: string;
+    start_time: string;
+    end_time: string | null;
+    location: string;
+    registration_url: string | null;
+  }[]
+) {
+  return events.map((event) => {
+    const isOnline = /online|zoom|virtual/i.test(event.location);
+    return {
+      "@context": "https://schema.org",
+      "@type": "Event",
+      "@id": `${SITE_URL}/events#${event.id}`,
+      name: event.title,
+      description: event.description,
+      startDate: `${event.event_date}T${event.start_time}`,
+      ...(event.end_time
+        ? { endDate: `${event.event_date}T${event.end_time}` }
+        : {}),
+      eventAttendanceMode: isOnline
+        ? "https://schema.org/OnlineEventAttendanceMode"
+        : "https://schema.org/OfflineEventAttendanceMode",
+      eventStatus: "https://schema.org/EventScheduled",
+      location: isOnline
+        ? {
+            "@type": "VirtualLocation",
+            url: event.registration_url ?? `${SITE_URL}/events`,
+          }
+        : {
+            "@type": "Place",
+            name: event.location,
+          },
+      organizer: {
+        "@type": "Person",
+        name: "Saroja",
+        url: SITE_URL,
+      },
+      offers: {
+        "@type": "Offer",
+        price: "0",
+        priceCurrency: "USD",
+        url: event.registration_url ?? `${SITE_URL}/events`,
+        availability: "https://schema.org/InStock",
+      },
+    };
+  });
+}
+
 export function breadcrumbSchema(pageName: string, path: string) {
   return {
     "@context": "https://schema.org",

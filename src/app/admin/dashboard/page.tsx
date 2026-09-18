@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import AdminDashboard from "@/components/admin/AdminDashboard";
 import { createClient } from "@/lib/supabase/server";
 import { getSessionStories } from "@/lib/session-stories.server";
+import { getEvents } from "@/lib/events.server";
 
 // See src/app/session-stories/page.tsx for why this is required.
 export const dynamic = "force-dynamic";
@@ -24,11 +25,11 @@ export default async function AdminDashboardPage() {
   }
 
   const email = (data.claims.email as string | undefined) ?? "Admin";
-  const stories = await getSessionStories();
+  const [stories, events] = await Promise.all([getSessionStories(), getEvents()]);
 
   return (
     <div className="pt-[112px] bg-deep min-h-screen">
-      <AdminDashboard email={email} initialStories={stories} />
+      <AdminDashboard email={email} initialStories={stories} initialEvents={events} />
     </div>
   );
 }
