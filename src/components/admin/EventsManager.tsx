@@ -4,20 +4,16 @@ import { useRef, useState, type FormEvent } from "react";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import {
+  EVENT_IMAGE_ASPECT,
   EVENT_IMAGE_BUCKET,
   formatEventDate,
   formatEventTime,
   getEventImageUrl,
   type Event,
 } from "@/lib/events";
+import ImageCropperDialog from "./ImageCropperDialog";
 
 const TIMEZONES = ["PST", "PDT", "MST", "MDT", "CST", "CDT", "EST", "EDT"] as const;
-
-function extensionFor(file: File) {
-  const fromName = file.name.split(".").pop();
-  if (fromName && fromName.length <= 5) return fromName.toLowerCase();
-  return file.type.split("/")[1] || "jpg";
-}
 
 export default function EventsManager({
   initialEvents,
@@ -38,6 +34,11 @@ export default function EventsManager({
   const [registrationUrl, setRegistrationUrl] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
+  // The originally-selected, uncropped photo — kept around (separately
+  // from `preview`, which shows the cropped result) so "Recrop Photo" can
+  // reopen the cropper without asking the admin to re-select the file.
+  const [rawImageUrl, setRawImageUrl] = useState<string | null>(null);
+  const [cropDialogOpen, setCropDialogOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -61,8 +62,30 @@ export default function EventsManager({
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const selected = e.target.files?.[0] ?? null;
-    setFile(selected);
-    setPreview(selected ? URL.createObjectURL(selected) : null);
+    if (!selected) return;
+    setRawImageUrl(URL.createObjectURL(selected));
+    setCropDialogOpen(true);
+  }
+
+  function handleCropCancel() {
+    setCropDialogOpen(false);
+    // Only discard the raw image if it was never actually cropped yet
+    // (e.g. the admin picked a file, then backed out) — if they're just
+    // re-opening the cropper on an already-cropped photo, leave the
+    // existing crop in place.
+    if (!file) {
+      setRawImageUrl(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  }
+
+  function handleCropped(blob: Blob) {
+    const croppedFile = new File([blob], `${crypto.randomUUID()}.jpg`, {
+      type: blob.type,
+    });
+    setFile(croppedFile);
+    setPreview(URL.createObjectURL(blob));
+    setCropDialogOpen(false);
   }
 
   function resetForm() {
@@ -78,6 +101,8 @@ export default function EventsManager({
     setRegistrationUrl("");
     setFile(null);
     setPreview(null);
+    setRawImageUrl(null);
+    setCropDialogOpen(false);
     if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
@@ -94,6 +119,8 @@ export default function EventsManager({
     setRegistrationUrl(event.registration_url ?? "");
     setFile(null);
     setPreview(getEventImageUrl(event.image_path));
+    setRawImageUrl(null);
+    setCropDialogOpen(false);
     if (fileInputRef.current) fileInputRef.current.value = "";
     setFormError(null);
     setFormSuccess(null);
@@ -115,7 +142,7 @@ export default function EventsManager({
       let imagePath: string | null = editingId ? editingImagePath : null;
 
       if (file) {
-        const path = `${crypto.randomUUID()}.${extensionFor(file)}`;
+        const path = `${crypto.randomUUID()}.jpg`;
         const { error: uploadError } = await supabase.storage
           .from(EVENT_IMAGE_BUCKET)
           .upload(path, file, { contentType: file.type, upsert: false });
@@ -326,18 +353,30 @@ export default function EventsManager({
               onChange={handleFileChange}
               className="w-full rounded-xl border border-white/15 bg-deep px-4 py-2.5 text-sm text-muted file:mr-3 file:rounded-full file:border-0 file:bg-violet file:px-4 file:py-2 file:text-xs file:tracking-[0.1em] file:uppercase file:text-cream"
             />
+            <p className="mt-1.5 text-[11px] text-muted">
+              You&apos;ll be asked to crop it to a {"16:9"} banner before it uploads.
+            </p>
           </div>
 
           {preview && (
-            <div className="sm:col-span-2">
+            <div className="sm:col-span-2 flex items-center gap-4">
               <Image
                 src={preview}
                 alt="Photo preview"
-                width={200}
-                height={150}
+                width={256}
+                height={144}
                 unoptimized
                 className="h-32 w-auto rounded-lg border border-white/10 object-cover"
               />
+              {rawImageUrl && (
+                <button
+                  type="button"
+                  onClick={() => setCropDialogOpen(true)}
+                  className="rounded-full border border-cream/25 px-4 py-2 text-[11px] tracking-[0.1em] uppercase text-cream transition-colors hover:border-gold hover:text-gold"
+                >
+                  Recrop Photo
+                </button>
+              )}
             </div>
           )}
 
@@ -457,6 +496,13 @@ export default function EventsManager({
           </ul>
         )}
       </div>
+
+      <ImageCropperDialog
+        imageUrl={cropDialogOpen ? rawImageUrl : null}
+        aspect={EVENT_IMAGE_ASPECT}
+        onCancel={handleCropCancel}
+        onCropped={handleCropped}
+      />
     </div>
   );
 }

@@ -7,6 +7,10 @@ import { SUPABASE_URL } from "@/lib/supabase/env";
 
 export const EVENT_IMAGE_BUCKET = "event-images";
 
+// Shared between the admin cropper and the public card/dialog so an image
+// cropped to this ratio always displays without any further CSS cropping.
+export const EVENT_IMAGE_ASPECT = 16 / 9;
+
 export type Event = {
   id: string;
   title: string;

@@ -22,14 +22,19 @@ export default function StoryImage({
   src,
   alt,
   seed,
+  className = "h-48 w-full",
 }: {
   src: string | null;
   alt: string;
   seed: string;
+  /** Sizing classes for the outer container. Defaults to the session-story
+   *  card's fixed height; events pass an aspect-ratio box instead so the
+   *  frame matches the admin's crop ratio exactly. */
+  className?: string;
 }) {
   if (src) {
     return (
-      <div className="relative h-48 w-full overflow-hidden bg-deep">
+      <div className={`relative overflow-hidden bg-deep ${className}`}>
         <Image
           src={src}
           alt={alt}
@@ -45,7 +50,7 @@ export default function StoryImage({
 
   return (
     <div
-      className="relative h-48 w-full overflow-hidden bg-deep"
+      className={`relative overflow-hidden bg-deep ${className}`}
       style={{
         backgroundImage: `radial-gradient(ellipse 140% 120% at 20% 15%, ${colorA.color}55, transparent 65%), radial-gradient(ellipse 140% 120% at 85% 90%, ${colorB.color}45, transparent 65%)`,
       }}
