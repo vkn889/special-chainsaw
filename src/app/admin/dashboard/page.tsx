@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import AdminDashboard from "@/components/admin/AdminDashboard";
-import { createClient } from "@/lib/supabase/server";
+import { getAdminSession } from "@/lib/firebase/session";
 import { getSessionStories } from "@/lib/session-stories.server";
 import { getEvents } from "@/lib/events.server";
 
@@ -17,14 +17,13 @@ export default async function AdminDashboardPage() {
   // Proxy already redirects signed-out visitors, but auth is re-checked
   // here too — Proxy does optimistic checks only and shouldn't be the
   // sole line of defense (see Next.js authentication guide).
-  const supabase = await createClient();
-  const { data } = await supabase.auth.getClaims();
+  const session = await getAdminSession();
 
-  if (!data?.claims) {
+  if (!session) {
     redirect("/admin");
   }
 
-  const email = (data.claims.email as string | undefined) ?? "Admin";
+  const email = session.email ?? "Admin";
   const [stories, events] = await Promise.all([getSessionStories(), getEvents()]);
 
   return (

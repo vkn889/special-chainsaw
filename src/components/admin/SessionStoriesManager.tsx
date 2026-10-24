@@ -2,10 +2,23 @@
 
 import { useRef, useState, type FormEvent } from "react";
 import Image from "next/image";
-import { createClient } from "@/lib/supabase/client";
 import {
-  SESSION_STORY_IMAGE_BUCKET,
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  getDocs,
+  orderBy,
+  query,
+  updateDoc,
+} from "firebase/firestore";
+import { deleteObject, ref, uploadBytes } from "firebase/storage";
+import { getFirebase } from "@/lib/firebase/client";
+import {
+  SESSION_STORIES_COLLECTION,
+  SESSION_STORY_IMAGE_FOLDER,
   getSessionStoryImageUrl,
+  sessionStoryFromDoc,
   type SessionStory,
 } from "@/lib/session-stories";
 
@@ -25,7 +38,8 @@ export default function SessionStoriesManager({
 }: {
   initialStories: SessionStory[];
 }) {
-  const supabase = createClient();
+  const { db, storage } = getFirebase();
+  const storiesRef = collection(db, SESSION_STORIES_COLLECTION);
 
   // Seeded from the server-rendered page, so the dashboard never needs a
   // client-side bootstrap fetch — `loadStories` below is only ever called
@@ -51,11 +65,12 @@ export default function SessionStoriesManager({
   const [formSuccess, setFormSuccess] = useState<string | null>(null);
 
   async function loadStories() {
-    const { data, error } = await supabase
-      .from("session_stories")
-      .select("id,title,body,image_path,session_type,created_at")
-      .order("created_at", { ascending: false });
-    if (!error && data) setStories(data);
+    try {
+      const snapshot = await getDocs(query(storiesRef, orderBy("created_at", "desc")));
+      setStories(snapshot.docs.map((d) => sessionStoryFromDoc(d.id, d.data())));
+    } catch {
+      // Keep the current list; the next page load will catch up.
+    }
   }
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -107,12 +122,12 @@ export default function SessionStoriesManager({
 
       if (file) {
         const path = `${crypto.randomUUID()}.${extensionFor(file)}`;
-        const { error: uploadError } = await supabase.storage
-          .from(SESSION_STORY_IMAGE_BUCKET)
-          .upload(path, file, { contentType: file.type, upsert: false });
-
-        if (uploadError) {
-          setFormError(`Image upload failed: ${uploadError.message}`);
+        try {
+          await uploadBytes(ref(storage, `${SESSION_STORY_IMAGE_FOLDER}/${path}`), file, {
+            contentType: file.type,
+          });
+        } catch (uploadError) {
+          setFormError(`Image upload failed: ${(uploadError as Error).message}`);
           setSubmitting(false);
           return;
         }
@@ -124,14 +139,17 @@ export default function SessionStoriesManager({
         body: body.trim(),
         session_type: sessionType,
         image_path: imagePath,
+        updated_at: new Date().toISOString(),
       };
 
-      const { error: saveError } = editingId
-        ? await supabase.from("session_stories").update(payload).eq("id", editingId)
-        : await supabase.from("session_stories").insert(payload);
-
-      if (saveError) {
-        setFormError(`Could not save the story: ${saveError.message}`);
+      try {
+        if (editingId) {
+          await updateDoc(doc(storiesRef, editingId), payload);
+        } else {
+          await addDoc(storiesRef, { ...payload, created_at: payload.updated_at });
+        }
+      } catch (saveError) {
+        setFormError(`Could not save the story: ${(saveError as Error).message}`);
         setSubmitting(false);
         return;
       }
@@ -152,13 +170,19 @@ export default function SessionStoriesManager({
   async function handleDelete(story: SessionStory) {
     if (!confirm(`Delete "${story.title}"? This can't be undone.`)) return;
 
-    if (story.image_path) {
-      await supabase.storage.from(SESSION_STORY_IMAGE_BUCKET).remove([story.image_path]);
+    try {
+      await deleteDoc(doc(storiesRef, story.id));
+    } catch {
+      return;
     }
-    const { error } = await supabase.from("session_stories").delete().eq("id", story.id);
-    if (!error) {
-      setStories((prev) => prev.filter((s) => s.id !== story.id));
-      if (editingId === story.id) resetForm();
+    setStories((prev) => prev.filter((s) => s.id !== story.id));
+    if (editingId === story.id) resetForm();
+
+    if (story.image_path) {
+      // Best-effort: an orphaned photo is harmless, so don't block on it.
+      await deleteObject(ref(storage, `${SESSION_STORY_IMAGE_FOLDER}/${story.image_path}`)).catch(
+        () => {}
+      );
     }
   }
 

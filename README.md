@@ -16,18 +16,38 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-### Session Stories / Admin login (Supabase)
+### Session Stories / Events / Admin login (Firebase)
 
-The `/session-stories` page and the `/admin` login + dashboard are backed by
-a Supabase project (Postgres + Auth + Storage). Copy `.env.example` to
-`.env.local` and fill in your project's URL and publishable key:
+The `/session-stories` and `/events` pages and the `/admin` login + dashboard
+are backed by a Firebase project (Auth + Firestore + Storage). Set these in
+`.env.local` (and in the Vercel project):
 
 ```bash
-cp .env.example .env.local
+# Firebase console → Project settings → General → Your apps (web app config)
+NEXT_PUBLIC_FIREBASE_API_KEY=
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=
+NEXT_PUBLIC_FIREBASE_APP_ID=
+# Project settings → Service accounts → Generate new private key (server-only, never commit)
+FIREBASE_CLIENT_EMAIL=
+FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
 ```
 
-Without these vars set, `/session-stories` renders an empty state and
-`/admin` will throw on load — the site otherwise builds and runs fine.
+Security rules live in `firestore.rules` / `storage.rules` — deploy them with
+`npx firebase-tools deploy --only firestore:rules,storage`.
+
+Admin accounts need the `admin` custom claim. Create or update one with:
+
+```bash
+node --env-file=.env.local scripts/set-admin.mjs <email> <password>
+```
+
+`scripts/migrate-from-supabase.mjs` imports the pre-migration content backed
+up in `scripts/supabase-export/` (safe to re-run).
+
+Without these vars set, `/session-stories` and `/events` render an empty
+state and `/admin` will throw on load — the site otherwise builds and runs fine.
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 

@@ -2,7 +2,8 @@
 
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
+import { signInWithEmailAndPassword, signOut } from "firebase/auth";
+import { getFirebase } from "@/lib/firebase/client";
 
 export default function AdminLoginForm() {
   const router = useRouter();
@@ -16,13 +17,26 @@ export default function AdminLoginForm() {
     setError(null);
     setPending(true);
 
-    const supabase = createClient();
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email: email.trim(),
-      password,
-    });
-
-    if (signInError) {
+    const { auth } = getFirebase();
+    try {
+      const credential = await signInWithEmailAndPassword(auth, email.trim(), password);
+      // Swap the ID token for an httpOnly session cookie the server checks.
+      const res = await fetch("/api/admin/session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idToken: await credential.user.getIdToken() }),
+      });
+      if (!res.ok) {
+        await signOut(auth);
+        setError(
+          res.status === 403
+            ? "This account doesn't have admin access."
+            : "Sign-in failed. Please try again."
+        );
+        setPending(false);
+        return;
+      }
+    } catch {
       setError("Incorrect email or password.");
       setPending(false);
       return;

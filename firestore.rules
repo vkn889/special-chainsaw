@@ -1,0 +1,22 @@
+rules_version = '2';
+
+// Public site reads stories/events; only accounts with the `admin` custom
+// claim (set by scripts/set-admin.mjs) can write. The server reads through
+// the Admin SDK, which bypasses these rules.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAdmin() {
+      return request.auth != null && request.auth.token.admin == true;
+    }
+
+    match /session_stories/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /events/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+  }
+}

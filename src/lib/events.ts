@@ -1,11 +1,13 @@
-import { SUPABASE_URL } from "@/lib/supabase/env";
+import { getStorageObjectUrl } from "@/lib/firebase/config";
 
 // Client-safe: types and pure helpers only. The actual data fetch
 // (`getEvents`) lives in `./events.server` because it needs `next/headers`,
 // which can't be pulled into client bundles (e.g. the admin dashboard
 // imports this file for its shared types/helpers).
 
-export const EVENT_IMAGE_BUCKET = "event-images";
+export const EVENTS_COLLECTION = "events";
+/** Firebase Storage folder holding event photos. */
+export const EVENT_IMAGE_FOLDER = "event-images";
 
 // Shared between the admin cropper and the public card/dialog so an image
 // cropped to this ratio always displays without any further CSS cropping.
@@ -25,12 +27,37 @@ export type Event = {
   created_at: string;
 };
 
-/** Builds the public URL for an uploaded event image. The storage bucket
- *  is public-read, so this is a plain, deterministic URL — no signing or
- *  extra round trip needed. */
+/** Maps a Firestore document (admin or browser SDK) to an Event. */
+export function eventFromDoc(id: string, d: Record<string, unknown>): Event {
+  return {
+    id,
+    title: d.title as string,
+    description: d.description as string,
+    event_date: d.event_date as string,
+    start_time: d.start_time as string,
+    end_time: (d.end_time as string | null) ?? null,
+    timezone: d.timezone as string,
+    location: d.location as string,
+    registration_url: (d.registration_url as string | null) ?? null,
+    image_path: (d.image_path as string | null) ?? null,
+    created_at: d.created_at as string,
+  };
+}
+
+/** Builds the public URL for an uploaded event image. */
 export function getEventImageUrl(imagePath: string | null): string | null {
-  if (!imagePath || !SUPABASE_URL) return null;
-  return `${SUPABASE_URL}/storage/v1/object/public/${EVENT_IMAGE_BUCKET}/${imagePath}`;
+  if (!imagePath) return null;
+  return getStorageObjectUrl(`${EVENT_IMAGE_FOLDER}/${imagePath}`);
+}
+
+/** Soonest-first: by date, then start time. Sorted in code rather than with
+ *  a two-field Firestore orderBy, which would need a composite index. */
+export function sortEvents(events: Event[]): Event[] {
+  return [...events].sort(
+    (a, b) =>
+      a.event_date.localeCompare(b.event_date) ||
+      a.start_time.localeCompare(b.start_time)
+  );
 }
 
 /** Formats a "HH:MM:SS" (or "HH:MM") time-of-day string as e.g. "10:00 AM". */

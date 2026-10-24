@@ -9,7 +9,7 @@ import { isUpcoming } from "@/lib/events";
 // See src/app/session-stories/page.tsx for why this is required: always
 // render at request time so an event an admin just published or edited
 // shows up immediately, and so the build doesn't try to prerender this
-// against Supabase before request context (and its env vars) exist.
+// against Firebase before request context (and its env vars) exist.
 export const dynamic = "force-dynamic";
 
 export const metadata = pageMetadata({

@@ -1,0 +1,20 @@
+rules_version = '2';
+
+// Story/event photos are public-read (the site links to them directly);
+// only admins can upload or delete, and uploads must be images under 10 MB.
+service firebase.storage {
+  match /b/{bucket}/o {
+    function isAdmin() {
+      return request.auth != null && request.auth.token.admin == true;
+    }
+
+    match /{folder}/{file} {
+      allow read: if folder in ['session-story-images', 'event-images'];
+      allow delete: if isAdmin() && folder in ['session-story-images', 'event-images'];
+      allow create, update: if isAdmin()
+        && folder in ['session-story-images', 'event-images']
+        && request.resource.contentType.matches('image/.*')
+        && request.resource.size < 10 * 1024 * 1024;
+    }
+  }
+}

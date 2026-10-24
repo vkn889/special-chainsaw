@@ -2,13 +2,18 @@
 
 import { useRef, useState, type FormEvent } from "react";
 import Image from "next/image";
-import { createClient } from "@/lib/supabase/client";
+import { addDoc, collection, deleteDoc, doc, getDocs, updateDoc } from "firebase/firestore";
+import { deleteObject, ref, uploadBytes } from "firebase/storage";
+import { getFirebase } from "@/lib/firebase/client";
 import {
+  EVENTS_COLLECTION,
   EVENT_IMAGE_ASPECT,
-  EVENT_IMAGE_BUCKET,
+  EVENT_IMAGE_FOLDER,
+  eventFromDoc,
   formatEventDate,
   formatEventTime,
   getEventImageUrl,
+  sortEvents,
   type Event,
 } from "@/lib/events";
 import ImageCropperDialog from "./ImageCropperDialog";
@@ -20,7 +25,8 @@ export default function EventsManager({
 }: {
   initialEvents: Event[];
 }) {
-  const supabase = createClient();
+  const { db, storage } = getFirebase();
+  const eventsRef = collection(db, EVENTS_COLLECTION);
 
   const [events, setEvents] = useState<Event[]>(initialEvents);
 
@@ -50,14 +56,12 @@ export default function EventsManager({
   const [formSuccess, setFormSuccess] = useState<string | null>(null);
 
   async function loadEvents() {
-    const { data, error } = await supabase
-      .from("events")
-      .select(
-        "id,title,description,event_date,start_time,end_time,timezone,location,registration_url,image_path,created_at"
-      )
-      .order("event_date", { ascending: true })
-      .order("start_time", { ascending: true });
-    if (!error && data) setEvents(data);
+    try {
+      const snapshot = await getDocs(eventsRef);
+      setEvents(sortEvents(snapshot.docs.map((d) => eventFromDoc(d.id, d.data()))));
+    } catch {
+      // Keep the current list; the next page load will catch up.
+    }
   }
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -143,12 +147,12 @@ export default function EventsManager({
 
       if (file) {
         const path = `${crypto.randomUUID()}.jpg`;
-        const { error: uploadError } = await supabase.storage
-          .from(EVENT_IMAGE_BUCKET)
-          .upload(path, file, { contentType: file.type, upsert: false });
-
-        if (uploadError) {
-          setFormError(`Image upload failed: ${uploadError.message}`);
+        try {
+          await uploadBytes(ref(storage, `${EVENT_IMAGE_FOLDER}/${path}`), file, {
+            contentType: file.type,
+          });
+        } catch (uploadError) {
+          setFormError(`Image upload failed: ${(uploadError as Error).message}`);
           setSubmitting(false);
           return;
         }
@@ -165,14 +169,17 @@ export default function EventsManager({
         location: location.trim() || "Online",
         registration_url: registrationUrl.trim() || null,
         image_path: imagePath,
+        updated_at: new Date().toISOString(),
       };
 
-      const { error: saveError } = editingId
-        ? await supabase.from("events").update(payload).eq("id", editingId)
-        : await supabase.from("events").insert(payload);
-
-      if (saveError) {
-        setFormError(`Could not save the event: ${saveError.message}`);
+      try {
+        if (editingId) {
+          await updateDoc(doc(eventsRef, editingId), payload);
+        } else {
+          await addDoc(eventsRef, { ...payload, created_at: payload.updated_at });
+        }
+      } catch (saveError) {
+        setFormError(`Could not save the event: ${(saveError as Error).message}`);
         setSubmitting(false);
         return;
       }
@@ -193,13 +200,19 @@ export default function EventsManager({
   async function handleDelete(event: Event) {
     if (!confirm(`Delete "${event.title}"? This can't be undone.`)) return;
 
-    if (event.image_path) {
-      await supabase.storage.from(EVENT_IMAGE_BUCKET).remove([event.image_path]);
+    try {
+      await deleteDoc(doc(eventsRef, event.id));
+    } catch {
+      return;
     }
-    const { error } = await supabase.from("events").delete().eq("id", event.id);
-    if (!error) {
-      setEvents((prev) => prev.filter((e) => e.id !== event.id));
-      if (editingId === event.id) resetForm();
+    setEvents((prev) => prev.filter((e) => e.id !== event.id));
+    if (editingId === event.id) resetForm();
+
+    if (event.image_path) {
+      // Best-effort: an orphaned photo is harmless, so don't block on it.
+      await deleteObject(ref(storage, `${EVENT_IMAGE_FOLDER}/${event.image_path}`)).catch(
+        () => {}
+      );
     }
   }
 

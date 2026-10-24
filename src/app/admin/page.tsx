@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import AdminLoginForm from "@/components/admin/AdminLoginForm";
-import { createClient } from "@/lib/supabase/server";
+import { getAdminSession } from "@/lib/firebase/session";
 
 // See src/app/session-stories/page.tsx for why this is required.
 export const dynamic = "force-dynamic";
@@ -13,9 +13,7 @@ export const metadata: Metadata = {
 };
 
 export default async function AdminLoginPage() {
-  const supabase = await createClient();
-  const { data } = await supabase.auth.getClaims();
-  if (data?.claims) {
+  if (await getAdminSession()) {
     redirect("/admin/dashboard");
   }
 

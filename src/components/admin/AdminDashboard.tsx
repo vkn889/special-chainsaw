@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
+import { signOut } from "firebase/auth";
+import { getFirebase } from "@/lib/firebase/client";
 import type { SessionStory } from "@/lib/session-stories";
 import type { Event } from "@/lib/events";
 import SessionStoriesManager from "./SessionStoriesManager";
@@ -20,11 +21,13 @@ export default function AdminDashboard({
   initialEvents: Event[];
 }) {
   const router = useRouter();
-  const supabase = createClient();
   const [tab, setTab] = useState<Tab>("stories");
 
   async function handleSignOut() {
-    await supabase.auth.signOut();
+    await Promise.all([
+      fetch("/api/admin/session", { method: "DELETE" }),
+      signOut(getFirebase().auth),
+    ]);
     router.push("/admin");
     router.refresh();
   }
